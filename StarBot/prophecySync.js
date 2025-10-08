@@ -28,7 +28,7 @@ class ProphecySync {
         { ref: 'Luke 10:19', text: 'I have given you authority to trample on snakes and scorpions and to overcome all the power of the enemy.' }
       ],
       gratitude: [
-        { ref: '1 Thessalonians 5:18', text: 'Give thanks in all circumstances; for this is God's will for you in Christ Jesus.' },
+        { ref: '1 Thessalonians 5:18', text: 'Give thanks in all circumstances; for this is God\'s will for you in Christ Jesus.' },
         { ref: 'Psalm 100:4', text: 'Enter his gates with thanksgiving and his courts with praise.' },
         { ref: 'Colossians 3:17', text: 'And whatever you do, whether in word or deed, do it all in the name of the Lord Jesus, giving thanks to God the Father through him.' }
       ],
