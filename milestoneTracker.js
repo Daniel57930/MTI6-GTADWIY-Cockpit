@@ -315,7 +315,7 @@ class MilestoneTracker {
    * @private
    */
   generateId() {
-    return `milestone_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `milestone_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
   /**
