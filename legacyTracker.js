@@ -1,23 +1,19 @@
-// legacyTracker.js
-// Spiritual growth logging scaffold
+// Spiritual growth logging utilities
 
 const legacyLog = [];
 
-function logGrowth(event, details = {}) {
+export function logGrowth(event, details = {}) {
   const entry = {
     event,
     details,
     timestamp: new Date().toISOString()
   };
+
   legacyLog.push(entry);
-  console.log('Spiritual growth logged:', entry);
+  console.log("Spiritual growth logged:", entry);
+  return entry;
 }
 
-function getLegacyLog() {
-  return legacyLog;
+export function getLegacyLog() {
+  return [...legacyLog];
 }
-
-module.exports = {
-  logGrowth,
-  getLegacyLog
-};

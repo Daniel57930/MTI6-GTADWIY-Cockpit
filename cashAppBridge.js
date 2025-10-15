@@ -1,28 +1,24 @@
-// cashAppBridge.js
 // Stealth deposit integration scaffold
 
-class CashAppBridge {
+export default class CashAppBridge {
   constructor() {
     this.depositQueue = [];
   }
 
   async stealthDeposit(amount, account) {
-    // Simulate stealth deposit logic (placeholder)
     const deposit = {
       amount,
       account,
       timestamp: new Date().toISOString(),
-      status: 'pending'
+      status: "pending"
     };
+
     this.depositQueue.push(deposit);
-    console.log('Stealth deposit queued:', deposit);
-    // Integrate with real Cash App API here
+    console.log("Stealth deposit queued:", deposit);
     return deposit;
   }
 
   getDepositQueue() {
-    return this.depositQueue;
+    return [...this.depositQueue];
   }
 }
-
-module.exports = CashAppBridge;
