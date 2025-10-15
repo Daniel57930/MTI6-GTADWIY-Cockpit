@@ -1,34 +1,32 @@
-/**
- * Milestone Tracker
- * - Star💥 sync logic for cockpit milestones
- */
+// Milestone tracking utilities for Star sync
 
 const milestones = [];
 let starSyncActive = false;
 
-function logMilestone(name, details = {}) {
+export function logMilestone(name, details = {}) {
   const entry = {
     name,
     details,
     timestamp: new Date().toISOString(),
     star: starSyncActive
   };
+
   milestones.push(entry);
-  // You can sync to Star💥 here (API placeholder)
+  return entry;
 }
 
-function activateStarSync() {
+export function activateStarSync() {
   starSyncActive = true;
 }
 
-function deactivateStarSync() {
+export function deactivateStarSync() {
   starSyncActive = false;
 }
 
-module.exports = {
-  logMilestone,
-  activateStarSync,
-  deactivateStarSync,
-  getMilestones: () => milestones,
-  isStarSyncActive: () => starSyncActive
-};
+export function getMilestones() {
+  return [...milestones];
+}
+
+export function isStarSyncActive() {
+  return starSyncActive;
+}
