@@ -1,9 +1,4 @@
-import React, { useState } from "react";
-
-/**
- * Blessing Overlay
- * - Prophetic wins display
- */
+import { useState } from "react";
 
 const blessings = [
   "Victory is declared over your journey.",
@@ -12,20 +7,31 @@ const blessings = [
   "Your path is guided and protected."
 ];
 
-const BlessingOverlay = () => {
-  const [current, setCurrent] = useState(0);
+const BlessingOverlay = ({ onBlessingChange }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const nextBlessing = () =>
-    setCurrent((prev) => (prev + 1) % blessings.length);
+  const showNextBlessing = () => {
+    const nextIndex = (currentIndex + 1) % blessings.length;
+    setCurrentIndex(nextIndex);
+    if (typeof onBlessingChange === "function") {
+      onBlessingChange(blessings[nextIndex]);
+    }
+  };
 
   return (
-    <div className="blessing-overlay">
-      <h2>Blessing Overlay</h2>
-      <div className="prophetic-win">
-        <p>{blessings[current]}</p>
-        <button onClick={nextBlessing}>Next Blessing</button>
+    <section className="overlay-card blessing-overlay">
+      <h2 className="overlay-card__title">Blessing Overlay</h2>
+      <div className="overlay-card__body">
+        <p className="overlay-card__message">{blessings[currentIndex]}</p>
+        <button
+          type="button"
+          className="overlay-card__action"
+          onClick={showNextBlessing}
+        >
+          Next Blessing
+        </button>
       </div>
-    </div>
+    </section>
   );
 };
 
