@@ -1,71 +1,93 @@
-import React, { useState } from "react";
+import { useMemo, useState } from "react";
 
-/**
- * Sovereign Override Panel
- * - Manual override toggles for cockpit systems
- * - Lighting sync logic
- * - Fallback loader/triggers for emergencies
- */
+const OverridePanel = ({ onOverrideChange, onFallbackTrigger, onLightingSyncChange }) => {
+  const [overrideEnabled, setOverrideEnabled] = useState(false);
+  const [lightingSyncEnabled, setLightingSyncEnabled] = useState(false);
+  const [fallbackEngaged, setFallbackEngaged] = useState(false);
 
-const OverridePanel = () => {
-  // Manual override state
-  const [override, setOverride] = useState(false);
+  const fallbackButtonClass = useMemo(() => {
+    const classes = ["fallback-trigger-button"];
+    classes.push(
+      fallbackEngaged ? "fallback-trigger-button--disabled" : "fallback-trigger-button--active"
+    );
+    return classes.join(" ");
+  }, [fallbackEngaged]);
 
-  // Lighting sync state
-  const [lightingSync, setLightingSync] = useState(false);
+  const toggleOverride = () => {
+    setOverrideEnabled((previous) => {
+      const next = !previous;
+      if (!next) {
+        setLightingSyncEnabled(false);
+        if (typeof onLightingSyncChange === "function") {
+          onLightingSyncChange(false);
+        }
+      }
 
-  // Fallback trigger state
-  const [fallbackActive, setFallbackActive] = useState(false);
+      if (typeof onOverrideChange === "function") {
+        onOverrideChange(next);
+      }
 
-  // Handlers
-  const handleOverrideToggle = () => setOverride((prev) => !prev);
+      return next;
+    });
+  };
 
-  const handleLightingSync = () => setLightingSync((prev) => !prev);
+  const toggleLightingSync = () => {
+    setLightingSyncEnabled((previous) => {
+      const next = !previous;
+      if (typeof onLightingSyncChange === "function") {
+        onLightingSyncChange(next);
+      }
+      return next;
+    });
+  };
 
-  const handleFallbackTrigger = () => setFallbackActive(true);
+  const triggerFallback = () => {
+    if (fallbackEngaged) {
+      return;
+    }
+
+    setFallbackEngaged(true);
+    if (typeof onFallbackTrigger === "function") {
+      onFallbackTrigger();
+    }
+  };
 
   return (
-    <section className="override-panel">
-      <h2>Override Control Panel</h2>
+    <section className="control-card override-panel">
+      <h2 className="control-card__title">Override Control Panel</h2>
+      <p className="control-card__description">
+        Manage manual overrides, synchronize cockpit lighting, and trigger emergency fallbacks.
+      </p>
 
-      <div>
-        <label>
+      <div className="toggle-list">
+        <label className="toggle-list__item">
           <input
             type="checkbox"
-            checked={override}
-            onChange={handleOverrideToggle}
+            checked={overrideEnabled}
+            onChange={toggleOverride}
           />
-          Manual Override
+          <span className="toggle-list__label">Manual Override</span>
+        </label>
+
+        <label className="toggle-list__item">
+          <input
+            type="checkbox"
+            checked={lightingSyncEnabled}
+            onChange={toggleLightingSync}
+            disabled={!overrideEnabled}
+          />
+          <span className="toggle-list__label">Lighting Sync</span>
         </label>
       </div>
 
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            checked={lightingSync}
-            onChange={handleLightingSync}
-            disabled={!override}
-          />
-          Lighting Sync
-        </label>
-      </div>
-
-      <div>
-        <button
-          onClick={handleFallbackTrigger}
-          disabled={fallbackActive}
-          style={{
-            background: fallbackActive ? "#999" : "#d22",
-            color: "#fff",
-            padding: "0.5em 1em",
-            borderRadius: "4px",
-            cursor: fallbackActive ? "not-allowed" : "pointer"
-          }}
-        >
-          {fallbackActive ? "Fallback Triggered" : "Trigger Fallback"}
-        </button>
-      </div>
+      <button
+        type="button"
+        className={fallbackButtonClass}
+        onClick={triggerFallback}
+        disabled={fallbackEngaged}
+      >
+        {fallbackEngaged ? "Fallback Triggered" : "Trigger Fallback"}
+      </button>
     </section>
   );
 };
