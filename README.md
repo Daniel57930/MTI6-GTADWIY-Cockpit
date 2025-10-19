@@ -1,3 +1,6 @@
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/Daniel57930/MTI6-GTADWIY-Cockpit)
+[![Vercel Status](https://vercelbadge.vercel.app/api/Daniel57930/MTI6-GTADWIY-Cockpit)](https://vercel.com/Daniel57930/MTI6-GTADWIY-Cockpit)
+
 # MTI6-GTADWIY-Cockpit
 
 Daniel Richardson’s sovereign cockpit—override control, emotional overlays, milestone logging, stealth trading flows, and spiritual presence.
