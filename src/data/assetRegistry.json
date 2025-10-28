@@ -1,0 +1,82 @@
+{
+  "version": "1.0.0",
+  "timestamp": "2025-10-28T04:04:18.018Z",
+  "assets": [
+    {
+      "id": "bat",
+      "symbol": "BAT",
+      "name": "Basic Attention Token",
+      "type": "token",
+      "blockchain": "ethereum",
+      "contractAddress": "0x0D8775F648430679A709E98d2b0Cb6250d2887EF",
+      "decimals": 18,
+      "category": "brave",
+      "description": "Brave Browser reward token for attention-based advertising",
+      "active": true
+    },
+    {
+      "id": "btc",
+      "symbol": "BTC",
+      "name": "Bitcoin",
+      "type": "cryptocurrency",
+      "blockchain": "bitcoin",
+      "decimals": 8,
+      "category": "crypto",
+      "description": "Primary cryptocurrency and store of value",
+      "active": true
+    },
+    {
+      "id": "eth",
+      "symbol": "ETH",
+      "name": "Ethereum",
+      "type": "cryptocurrency",
+      "blockchain": "ethereum",
+      "decimals": 18,
+      "category": "crypto",
+      "description": "Smart contract platform and cryptocurrency",
+      "active": true
+    },
+    {
+      "id": "usdt",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "blockchain": "ethereum",
+      "contractAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "decimals": 6,
+      "logoURI": "https://assets.coingecko.com/coins/images/325/small/Tether.png",
+      "tags": [
+        "stablecoin",
+        "usd-pegged"
+      ],
+      "verified": true
+    },
+    {
+      "id": "usdc",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "blockchain": "ethereum",
+      "contractAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "decimals": 6,
+      "logoURI": "https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png",
+      "tags": [
+        "stablecoin",
+        "usd-pegged",
+        "defi"
+      ],
+      "verified": true
+    }
+  ],
+  "components": {
+    "TopSearchBar": "/components/TopSearchBar.jsx",
+    "GlobalSearchBar": "/components/GlobalSearchBar.jsx",
+    "GTAdwiyTerrain": "/components/GTAdwiyTerrain.jsx",
+    "EmotionalOverlay": "/components/emotionalOverlay.jsx",
+    "OverridePanel": "/components/overridePanel.jsx"
+  },
+  "stats": {
+    "totalAssets": 5,
+    "fromAssets": 3,
+    "fromTokens": 2,
+    "components": 5
+  }
+}
