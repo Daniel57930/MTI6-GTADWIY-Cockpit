@@ -14,6 +14,12 @@ const BASE_URL = "https://api.together.xyz/v1";
  * @returns {Promise<object>} Avatar personality
  */
 export async function generateAvatarPersonality(traits) {
+  // Guard: return null if API key is not configured to avoid runtime errors
+  if (!API_KEY) {
+    console.error('TOGETHERAI_API_KEY not set - cannot generate avatar personality');
+    return null;
+  }
+  
   const url = `${BASE_URL}/chat/completions`;
   const prompt = `Create a unique personality profile for an AI avatar with these traits: ${JSON.stringify(traits)}`;
   
@@ -49,6 +55,12 @@ export async function generateAvatarPersonality(traits) {
  * @returns {Promise<object>} Avatar image
  */
 export async function generateAvatarImage(description) {
+  // Guard: return null if API key is not configured to avoid runtime errors
+  if (!API_KEY) {
+    console.error('TOGETHERAI_API_KEY not set - cannot generate avatar image');
+    return null;
+  }
+  
   const url = `${BASE_URL}/images/generations`;
   
   try {

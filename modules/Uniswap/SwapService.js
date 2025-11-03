@@ -21,7 +21,9 @@ export async function getProvider() {
     return provider;
   }
   const rpc = process.env.REACT_APP_RPC_URL;
-  if (!rpc) throw new Error("No provider available and REACT_APP_RPC_URL not set");
+  if (!rpc) {
+    throw new Error("No injected wallet found and REACT_APP_RPC_URL environment variable is not set. Please install MetaMask or configure REACT_APP_RPC_URL in your .env file.");
+  }
   return new ethers.providers.JsonRpcProvider(rpc);
 }
 
