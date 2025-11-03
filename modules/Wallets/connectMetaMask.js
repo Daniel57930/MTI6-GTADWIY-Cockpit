@@ -1,3 +1,12 @@
+/**
+ * Connect to MetaMask wallet
+ * 
+ * Prompts the user to connect their MetaMask wallet and returns the connected address.
+ * Requires MetaMask browser extension to be installed.
+ * 
+ * @returns {Promise<string>} The connected wallet address
+ * @throws {Error} If MetaMask is not installed or connection fails
+ */
 export async function connectMetaMask() {
   if (window.ethereum) {
     try {

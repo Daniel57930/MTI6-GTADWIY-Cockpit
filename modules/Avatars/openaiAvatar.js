@@ -14,6 +14,12 @@ const BASE_URL = "https://api.openai.com/v1";
  * @returns {Promise<object>} Avatar personality
  */
 export async function generateAvatarPersonality(traits) {
+  // Guard: return null if API key is not configured to avoid runtime errors
+  if (!API_KEY) {
+    console.error('OPENAI_API_KEY not set - cannot generate avatar personality');
+    return null;
+  }
+  
   const prompt = `Create a detailed personality profile for an AI bot avatar with these traits: ${JSON.stringify(traits)}`;
   
   try {
@@ -48,6 +54,12 @@ export async function generateAvatarPersonality(traits) {
  * @returns {Promise<object>} Avatar image URL
  */
 export async function generateAvatarImage(description) {
+  // Guard: return null if API key is not configured to avoid runtime errors
+  if (!API_KEY) {
+    console.error('OPENAI_API_KEY not set - cannot generate avatar image');
+    return null;
+  }
+  
   try {
     const response = await fetch(`${BASE_URL}/images/generations`, {
       method: 'POST',

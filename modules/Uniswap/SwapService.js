@@ -16,12 +16,19 @@ const SwapRouterABI = [
 ];
 
 export async function getProvider() {
+  // Guard: ensure ethers library is available
+  if (typeof ethers === "undefined") {
+    throw new Error("ethers library not available - ensure it is imported and bundled correctly");
+  }
+  
   if (typeof window !== "undefined" && window.ethereum) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     return provider;
   }
   const rpc = process.env.REACT_APP_RPC_URL;
-  if (!rpc) throw new Error("No provider available and REACT_APP_RPC_URL not set");
+  if (!rpc) {
+    throw new Error("No injected wallet found and REACT_APP_RPC_URL environment variable is not set. Please install MetaMask or configure REACT_APP_RPC_URL in your .env file.");
+  }
   return new ethers.providers.JsonRpcProvider(rpc);
 }
 
@@ -38,6 +45,10 @@ export async function getQuoteSingle({ tokenIn, tokenOut, fee = 3000, amountIn }
 }
 
 export async function buildAndSendSwap({ tokenIn, tokenOut, fee = 3000, recipient, amountIn, amountOutMinimum = 0, deadline = Math.floor(Date.now() / 1000) + 60 * 20, sqrtPriceLimitX96 = 0 }) {
+  // Guard: ensure ethers library is available
+  if (typeof ethers === "undefined") {
+    throw new Error("ethers library not available - ensure it is imported and bundled correctly");
+  }
   if (!window?.ethereum) throw new Error("No injected wallet found (window.ethereum)");
   await window.ethereum.request({ method: "eth_requestAccounts" });
   const provider = new ethers.providers.Web3Provider(window.ethereum);

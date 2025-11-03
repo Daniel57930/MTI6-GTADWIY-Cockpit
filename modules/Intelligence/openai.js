@@ -4,7 +4,9 @@ const OPENAI_API_BASE = "https://api.openai.com/v1";
 const API_KEY = getIntelligenceApiKey("openai");
 
 async function openaiRequest(path, method = "POST", body = {}) {
-  if (!API_KEY) throw new Error("OpenAI API key missing");
+  if (!API_KEY) {
+    throw new Error("OpenAI API key is missing. Please set the intelligence API key in your configuration or environment. Check modules/Intelligence/intelligenceApis.js for setup instructions.");
+  }
   const res = await fetch(`${OPENAI_API_BASE}${path}`, {
     method,
     headers: {
