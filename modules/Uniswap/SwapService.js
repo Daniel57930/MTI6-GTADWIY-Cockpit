@@ -16,11 +16,6 @@ const SwapRouterABI = [
 ];
 
 export async function getProvider() {
-  // Guard: ensure ethers library is available
-  if (typeof ethers === "undefined") {
-    throw new Error("ethers library not available - ensure it is imported and bundled correctly");
-  }
-  
   if (typeof window !== "undefined" && window.ethereum) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     return provider;
@@ -45,10 +40,6 @@ export async function getQuoteSingle({ tokenIn, tokenOut, fee = 3000, amountIn }
 }
 
 export async function buildAndSendSwap({ tokenIn, tokenOut, fee = 3000, recipient, amountIn, amountOutMinimum = 0, deadline = Math.floor(Date.now() / 1000) + 60 * 20, sqrtPriceLimitX96 = 0 }) {
-  // Guard: ensure ethers library is available
-  if (typeof ethers === "undefined") {
-    throw new Error("ethers library not available - ensure it is imported and bundled correctly");
-  }
   if (!window?.ethereum) throw new Error("No injected wallet found (window.ethereum)");
   await window.ethereum.request({ method: "eth_requestAccounts" });
   const provider = new ethers.providers.Web3Provider(window.ethereum);
