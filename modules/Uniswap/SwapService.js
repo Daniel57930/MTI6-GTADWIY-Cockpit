@@ -1,12 +1,13 @@
 import { ethers } from "ethers";
 import * as adapter from "./UniswapAdapter";
+import { getEnv, isBrowser } from "../../src/lib/envGuard";
 
 // Minimal SwapService for Uniswap v3
 // - Uses injected wallet (MetaMask / WalletConnect) for client-side signing
 // - For server-side signing create a server endpoint that uses SWAP_SERVER_PRIVATE_KEY (NOT in repo)
 
-const QUOTER_ADDRESS = process.env.REACT_APP_QUOTER_ADDRESS || "0x0000000000000000000000000000000000000000";
-const SWAP_ROUTER_ADDRESS = process.env.REACT_APP_SWAP_ROUTER_ADDRESS || "0x0000000000000000000000000000000000000000";
+const QUOTER_ADDRESS = getEnv("REACT_APP_QUOTER_ADDRESS", "0x0000000000000000000000000000000000000000");
+const SWAP_ROUTER_ADDRESS = getEnv("REACT_APP_SWAP_ROUTER_ADDRESS", "0x0000000000000000000000000000000000000000");
 
 const QuoterABI = [
   "function quoteExactInputSingle(address,address,uint24,uint256,uint160) external returns (uint256)"
@@ -16,12 +17,15 @@ const SwapRouterABI = [
 ];
 
 export async function getProvider() {
-  if (typeof window !== "undefined" && window.ethereum) {
+  if (!ethers) {
+    throw new Error("ethers library not loaded");
+  }
+  if (isBrowser() && window.ethereum) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     return provider;
   }
-  const rpc = process.env.REACT_APP_RPC_URL;
-  if (!rpc) throw new Error("No provider available and REACT_APP_RPC_URL not set");
+  const rpc = getEnv("REACT_APP_RPC_URL");
+  if (!rpc) throw new Error("No provider available: window.ethereum not found and REACT_APP_RPC_URL not set");
   return new ethers.providers.JsonRpcProvider(rpc);
 }
 
@@ -38,7 +42,8 @@ export async function getQuoteSingle({ tokenIn, tokenOut, fee = 3000, amountIn }
 }
 
 export async function buildAndSendSwap({ tokenIn, tokenOut, fee = 3000, recipient, amountIn, amountOutMinimum = 0, deadline = Math.floor(Date.now() / 1000) + 60 * 20, sqrtPriceLimitX96 = 0 }) {
-  if (!window?.ethereum) throw new Error("No injected wallet found (window.ethereum)");
+  if (!isBrowser()) throw new Error("Swap requires browser environment");
+  if (!window?.ethereum) throw new Error("No injected wallet found (window.ethereum). Please install MetaMask or another Web3 wallet.");
   await window.ethereum.request({ method: "eth_requestAccounts" });
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
@@ -57,12 +62,12 @@ export async function buildAndSendSwap({ tokenIn, tokenOut, fee = 3000, recipien
   try {
     const tx = await swapRouter.exactInputSingle(params, { gasLimit: 800000 });
     const receipt = await tx.wait();
-    if (typeof window !== "undefined" && window.BotStatsLogger) {
+    if (isBrowser() && window.BotStatsLogger) {
       window.BotStatsLogger.log({ type: "swap", provider: "uniswap", txHash: receipt.transactionHash, status: "completed", params });
     }
     return { ok: true, receipt };
   } catch (err) {
-    if (typeof window !== "undefined" && window.BotStatsLogger) {
+    if (isBrowser() && window.BotStatsLogger) {
       window.BotStatsLogger.log({ type: "swap", provider: "uniswap", status: "failed", error: String(err), params });
     }
     console.error("Swap failed:", err);
