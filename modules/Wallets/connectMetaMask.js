@@ -1,4 +1,9 @@
+import { isBrowser } from '../../src/lib/envGuard.js';
+
 export async function connectMetaMask() {
+  if (!isBrowser()) {
+    throw new Error("MetaMask connection requires a browser environment");
+  }
   if (window.ethereum) {
     try {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -8,6 +13,6 @@ export async function connectMetaMask() {
       throw new Error("MetaMask sign-in failed: " + error.message);
     }
   } else {
-    throw new Error("MetaMask extension not detected.");
+    throw new Error("MetaMask extension not detected. Please install MetaMask from https://metamask.io");
   }
 }
