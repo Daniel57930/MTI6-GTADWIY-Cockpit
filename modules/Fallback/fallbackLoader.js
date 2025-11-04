@@ -166,9 +166,10 @@ async function executeAction(action, context) {
     case "switch_key":
       return { keyIndex: action.keyIndex };
     
-    case "select_provider":
+    case "select_provider": {
       const provider = action.providers[0] || "default";
       return { provider };
+    }
     
     case "load_emotional_state":
       return { emotionalState: action.state };

@@ -15,6 +15,7 @@ export default class MilestoneTracker {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) this._data = JSON.parse(raw);
     } catch (err) {
+      console.warn('MilestoneTracker: failed to load from localStorage', err);
     }
   }
 
@@ -22,6 +23,7 @@ export default class MilestoneTracker {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this._data));
     } catch (err) {
+      console.warn('MilestoneTracker: failed to save to localStorage', err);
     }
   }
 
@@ -32,7 +34,7 @@ export default class MilestoneTracker {
 
   _emit() {
     for (const fn of Array.from(this._listeners)) {
-      try { fn(this._data); } catch (e) { }
+      try { fn(this._data); } catch (e) { console.warn('MilestoneTracker listener error', e); }
     }
   }
 
