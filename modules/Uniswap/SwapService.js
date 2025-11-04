@@ -17,11 +17,6 @@ const SwapRouterABI = [
 ];
 
 export async function getProvider() {
-  // Check if ethers is available
-  if (typeof ethers === 'undefined') {
-    throw new Error("ethers library is not available. Ensure it is properly installed.");
-  }
-  
   if (isBrowser() && window.ethereum) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     return provider;
@@ -51,10 +46,6 @@ export async function buildAndSendSwap({ tokenIn, tokenOut, fee = 3000, recipien
   }
   if (!window?.ethereum) {
     throw new Error("No injected wallet found. Please install MetaMask or another Web3 wallet extension.");
-  }
-  // Check if ethers is available
-  if (typeof ethers === 'undefined') {
-    throw new Error("ethers library is not available. Ensure it is properly installed.");
   }
   
   await window.ethereum.request({ method: "eth_requestAccounts" });
