@@ -17,9 +17,6 @@ const SwapRouterABI = [
 ];
 
 export async function getProvider() {
-  if (!ethers) {
-    throw new Error("ethers library not loaded");
-  }
   if (isBrowser() && window.ethereum) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     return provider;
