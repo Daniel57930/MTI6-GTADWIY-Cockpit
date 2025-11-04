@@ -1,11 +1,13 @@
 /**
  * Together AI Avatar Connector
- * 
+ *
  * Creates avatars using Together AI models
  * API Key from process.env.TOGETHERAI_API_KEY
  */
 
-const API_KEY = process.env.TOGETHERAI_API_KEY;
+import { getApiKey } from "../../src/lib/envGuard.js";
+
+const API_KEY = getApiKey("togetherai");
 const BASE_URL = "https://api.together.xyz/v1";
 
 /**
@@ -14,9 +16,14 @@ const BASE_URL = "https://api.together.xyz/v1";
  * @returns {Promise<object>} Avatar personality
  */
 export async function generateAvatarPersonality(traits) {
+  if (!API_KEY) {
+    console.error("TogetherAI avatar: TOGETHERAI_API_KEY not set. Returning null.");
+    return null;
+  }
+
   const url = `${BASE_URL}/chat/completions`;
   const prompt = `Create a unique personality profile for an AI avatar with these traits: ${JSON.stringify(traits)}`;
-  
+
   try {
     const response = await fetch(url, {
       method: 'POST',
@@ -29,7 +36,7 @@ export async function generateAvatarPersonality(traits) {
         messages: [{ role: 'user', content: prompt }]
       })
     });
-    
+
     if (!response.ok) throw new Error(`Together AI API error: ${response.status}`);
     const data = await response.json();
     return {
@@ -49,8 +56,13 @@ export async function generateAvatarPersonality(traits) {
  * @returns {Promise<object>} Avatar image
  */
 export async function generateAvatarImage(description) {
+  if (!API_KEY) {
+    console.error("TogetherAI avatar: TOGETHERAI_API_KEY not set. Returning null.");
+    return null;
+  }
+
   const url = `${BASE_URL}/images/generations`;
-  
+
   try {
     const response = await fetch(url, {
       method: 'POST',
@@ -64,7 +76,7 @@ export async function generateAvatarImage(description) {
         n: 1
       })
     });
-    
+
     if (!response.ok) throw new Error(`Together AI API error: ${response.status}`);
     const data = await response.json();
     return {

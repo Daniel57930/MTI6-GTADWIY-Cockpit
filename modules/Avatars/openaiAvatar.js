@@ -1,11 +1,13 @@
 /**
  * OpenAI Avatar Connector
- * 
+ *
  * Creates AI-generated avatars and personalities using OpenAI
  * API Key from process.env.OPENAI_API_KEY
  */
 
-const API_KEY = process.env.OPENAI_API_KEY;
+import { getApiKey } from "../../src/lib/envGuard.js";
+
+const API_KEY = getApiKey("openai");
 const BASE_URL = "https://api.openai.com/v1";
 
 /**
@@ -14,8 +16,13 @@ const BASE_URL = "https://api.openai.com/v1";
  * @returns {Promise<object>} Avatar personality
  */
 export async function generateAvatarPersonality(traits) {
+  if (!API_KEY) {
+    console.error("OpenAI avatar: OPENAI_API_KEY not set. Returning null.");
+    return null;
+  }
+
   const prompt = `Create a detailed personality profile for an AI bot avatar with these traits: ${JSON.stringify(traits)}`;
-  
+
   try {
     const response = await fetch(`${BASE_URL}/chat/completions`, {
       method: 'POST',
@@ -28,7 +35,7 @@ export async function generateAvatarPersonality(traits) {
         messages: [{ role: 'user', content: prompt }]
       })
     });
-    
+
     if (!response.ok) throw new Error(`OpenAI API error: ${response.status}`);
     const data = await response.json();
     return {
@@ -48,6 +55,11 @@ export async function generateAvatarPersonality(traits) {
  * @returns {Promise<object>} Avatar image URL
  */
 export async function generateAvatarImage(description) {
+  if (!API_KEY) {
+    console.error("OpenAI avatar: OPENAI_API_KEY not set. Returning null.");
+    return null;
+  }
+
   try {
     const response = await fetch(`${BASE_URL}/images/generations`, {
       method: 'POST',
@@ -61,7 +73,7 @@ export async function generateAvatarImage(description) {
         size: "256x256"
       })
     });
-    
+
     if (!response.ok) throw new Error(`OpenAI API error: ${response.status}`);
     const data = await response.json();
     return {
