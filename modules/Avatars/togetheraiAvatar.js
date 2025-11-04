@@ -5,7 +5,9 @@
  * API Key from process.env.TOGETHERAI_API_KEY
  */
 
-const API_KEY = process.env.TOGETHERAI_API_KEY;
+import { getApiKey } from '../../src/lib/envGuard.js';
+
+const API_KEY = getApiKey("togetherai");
 const BASE_URL = "https://api.together.xyz/v1";
 
 /**
@@ -14,6 +16,11 @@ const BASE_URL = "https://api.together.xyz/v1";
  * @returns {Promise<object>} Avatar personality
  */
 export async function generateAvatarPersonality(traits) {
+  if (!API_KEY) {
+    console.warn("Together AI API key is missing. Set TOGETHERAI_API_KEY, REACT_APP_TOGETHERAI_API_KEY, or VITE_TOGETHERAI_API_KEY environment variable.");
+    return null;
+  }
+  
   const url = `${BASE_URL}/chat/completions`;
   const prompt = `Create a unique personality profile for an AI avatar with these traits: ${JSON.stringify(traits)}`;
   
@@ -49,6 +56,11 @@ export async function generateAvatarPersonality(traits) {
  * @returns {Promise<object>} Avatar image
  */
 export async function generateAvatarImage(description) {
+  if (!API_KEY) {
+    console.warn("Together AI API key is missing. Set TOGETHERAI_API_KEY, REACT_APP_TOGETHERAI_API_KEY, or VITE_TOGETHERAI_API_KEY environment variable.");
+    return null;
+  }
+  
   const url = `${BASE_URL}/images/generations`;
   
   try {

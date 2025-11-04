@@ -1,10 +1,12 @@
-import { getIntelligenceApiKey } from './intelligenceApis';
+import { getApiKey } from '../../src/lib/envGuard.js';
 
 const OPENAI_API_BASE = "https://api.openai.com/v1";
-const API_KEY = getIntelligenceApiKey("openai");
+const API_KEY = getApiKey("openai");
 
 async function openaiRequest(path, method = "POST", body = {}) {
-  if (!API_KEY) throw new Error("OpenAI API key missing");
+  if (!API_KEY) {
+    throw new Error("OpenAI API key is missing. Set OPENAI_API_KEY, REACT_APP_OPENAI_API_KEY, or VITE_OPENAI_API_KEY environment variable.");
+  }
   const res = await fetch(`${OPENAI_API_BASE}${path}`, {
     method,
     headers: {
