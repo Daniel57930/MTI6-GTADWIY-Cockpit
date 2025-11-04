@@ -1,13 +1,19 @@
+import { isBrowser } from "../../src/lib/envGuard.js";
+
 export async function connectMetaMask() {
+  if (!isBrowser()) {
+    throw new Error("connectMetaMask must be called in a browser environment with window object.");
+  }
+
   if (window.ethereum) {
     try {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       return accounts[0]; // Returns first connected wallet address
     } catch (error) {
-      throw new Error("MetaMask sign-in failed: " + error.message);
+      throw new Error("MetaMask sign-in failed: " + (error?.message || String(error)));
     }
   } else {
-    throw new Error("MetaMask extension not detected.");
+    throw new Error("MetaMask extension not detected. Please install MetaMask or use a wallet provider.");
   }
 }
