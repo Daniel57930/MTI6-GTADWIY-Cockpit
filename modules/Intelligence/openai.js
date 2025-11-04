@@ -7,7 +7,7 @@ async function openaiRequest(path, method = "POST", body = {}) {
   if (!API_KEY) {
     throw new Error(
       "OpenAI API key missing for intelligence connector. " +
-      "Set the intelligence API key (OPENAI_API_KEY) in environment or ensure your intelligenceApis wrapper provides it."
+      "Set the intelligence API key (OPENAI_API_KEY) in your environment variables."
     );
   }
   const res = await fetch(`${OPENAI_API_BASE}${path}`, {
