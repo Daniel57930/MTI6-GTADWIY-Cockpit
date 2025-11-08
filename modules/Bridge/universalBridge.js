@@ -16,15 +16,21 @@ export async function bridgeFunds({ fromChain, toChain, asset, amount, wallet, o
     // Try Stargate
     const stargate = await getStargateQuote({ fromChain, toChain, asset, amount });
     if (stargate) quotes.push({ ...stargate, bridge: "Stargate" });
-  } catch (e) {}
+  } catch (e) {
+    console.warn('getStargateQuote failed', e);
+  }
   try {
     const synapse = await getSynapseQuote({ fromChain, toChain, asset, amount });
     if (synapse) quotes.push({ ...synapse, bridge: "Synapse" });
-  } catch (e) {}
+  } catch (e) {
+    console.warn('getSynapseQuote failed', e);
+  }
   try {
     const orbiter = await getOrbiterQuote({ fromChain, toChain, asset, amount });
     if (orbiter) quotes.push({ ...orbiter, bridge: "Orbiter" });
-  } catch (e) {}
+  } catch (e) {
+    console.warn('getOrbiterQuote failed', e);
+  }
 
   // Sort by best quote (lowest fee or per user override)
   quotes = quotes.filter(q => !!q);
