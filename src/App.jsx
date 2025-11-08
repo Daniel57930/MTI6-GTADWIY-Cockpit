@@ -4,6 +4,8 @@ import EmotionalOverlay from "../emotionalOverlay.jsx";
 import OverridePanel from "../overridePanel.jsx";
 import CashAppBridge from "../cashAppBridge.js";
 import WalletConnect from "../walletConnect.js";
+import BrowserBox from "./components/BrowserBox.jsx";
+import WalletConnectButton from "./components/WalletConnectButton.jsx";
 import {
   activateStarSync,
   deactivateStarSync,
@@ -268,16 +270,12 @@ const App = () => {
             <section className="control-card wallet-panel">
               <div className="control-card__header">
                 <h2 className="control-card__title">Wallet Sync</h2>
-                <span className={`status-indicator status-indicator--${walletStatus}`}>
-                  {walletStatus}
-                </span>
               </div>
+              <BrowserBox />
               <p className="control-card__description">
                 Connect MetaMask to synchronize cockpit telemetry with blockchain controls.
               </p>
-              <button type="button" className="primary-action-button" onClick={connectWallet}>
-                Connect MetaMask
-              </button>
+              <WalletConnectButton />
             </section>
           </div>
         </div>
