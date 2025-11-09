@@ -1,289 +1,198 @@
-import { useMemo, useState } from "react";
-import BlessingOverlay from "../blessingOverlay.jsx";
-import EmotionalOverlay from "../emotionalOverlay.jsx";
-import OverridePanel from "../overridePanel.jsx";
-import CashAppBridge from "../cashAppBridge.js";
-import WalletConnect from "../walletConnect.js";
-import {
-  activateStarSync,
-  deactivateStarSync,
-  getMilestones,
-  isStarSyncActive,
-  logMilestone
-} from "../milestoneTracker.js";
-import { getLegacyLog, logGrowth } from "../legacyTracker.js";
-import "../styles/cockpit.css";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import GlobeScreen from '../screens/GlobeScreen.jsx';
+import TradingScreen from '../screens/TradingScreen.jsx';
+import EarningsOverlay from '../components/EarningsOverlay.jsx';
+import M6Emblem from '../components/M6Emblem.jsx';
+import UserHead from '../components/UserHead.jsx';
+import SearchBar from '../components/SearchBar.jsx';
 
-const App = () => {
-  const walletConnector = useMemo(() => new WalletConnect(), []);
-  const cashBridge = useMemo(() => new CashAppBridge(), []);
-
-  const [milestoneName, setMilestoneName] = useState("");
-  const [milestoneDetail, setMilestoneDetail] = useState("");
-  const [milestones, setMilestones] = useState(getMilestones());
-  const [starSyncEnabled, setStarSyncEnabled] = useState(isStarSyncActive());
-
-  const [legacyReflection, setLegacyReflection] = useState("");
-  const [legacyEntries, setLegacyEntries] = useState(getLegacyLog());
-
-  const [depositAmount, setDepositAmount] = useState("");
-  const [depositAccount, setDepositAccount] = useState("");
-  const [depositQueue, setDepositQueue] = useState(cashBridge.getDepositQueue());
-
-  const [walletStatus, setWalletStatus] = useState("disconnected");
-
-  const handleMilestoneSubmit = (event) => {
-    event.preventDefault();
-    if (!milestoneName.trim()) {
-      return;
-    }
-
-    logMilestone(milestoneName.trim(),
-      milestoneDetail.trim()
-        ? { note: milestoneDetail.trim() }
-        : undefined
-    );
-    setMilestones(getMilestones());
-    setMilestoneName("");
-    setMilestoneDetail("");
-  };
-
-  const toggleStarSync = () => {
-    if (starSyncEnabled) {
-      deactivateStarSync();
-    } else {
-      activateStarSync();
-    }
-    setStarSyncEnabled(isStarSyncActive());
-  };
-
-  const handleLegacySubmit = (event) => {
-    event.preventDefault();
-    if (!legacyReflection.trim()) {
-      return;
-    }
-
-    logGrowth("Legacy milestone", { reflection: legacyReflection.trim() });
-    setLegacyEntries(getLegacyLog());
-    setLegacyReflection("");
-  };
-
-  const handleDepositSubmit = async (event) => {
-    event.preventDefault();
-    const cleanedAccount = depositAccount.trim();
-    const parsedAmount = Number(depositAmount);
-
-    if (!cleanedAccount || Number.isNaN(parsedAmount) || parsedAmount <= 0) {
-      return;
-    }
-
-    await cashBridge.stealthDeposit(parsedAmount, cleanedAccount);
-    setDepositQueue(cashBridge.getDepositQueue());
-    setDepositAmount("");
-    setDepositAccount("");
-  };
-
-  const connectWallet = async () => {
-    const connected = await walletConnector.connectMetaMask();
-    setWalletStatus(connected ? "connected" : "disconnected");
-  };
+/**
+ * Navigation component
+ */
+function Navigation() {
+  const location = useLocation();
+  
+  const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="cockpit-dashboard">
-      <header className="dashboard-header">
-        <h1 className="dashboard-title">GTADWIY Cockpit</h1>
-        <p className="dashboard-subtitle">
-          Manage sovereign overrides, emotional overlays, milestones, and financial flows.
-        </p>
-      </header>
-
-      <main className="dashboard-main">
-        <div className="panel-grid">
-          <div className="panel-column">
-            <BlessingOverlay />
-            <EmotionalOverlay />
-          </div>
-
-          <div className="panel-column">
-            <OverridePanel />
-
-            <section className="control-card milestone-tracker">
-              <div className="control-card__header">
-                <h2 className="control-card__title">Milestone Tracker</h2>
-                <button
-                  type="button"
-                  className={`toggle-button ${starSyncEnabled ? "toggle-button--active" : ""}`}
-                  onClick={toggleStarSync}
-                >
-                  {starSyncEnabled ? "Star Sync Enabled" : "Enable Star Sync"}
-                </button>
-              </div>
-
-              <form className="form-grid" onSubmit={handleMilestoneSubmit}>
-                <label className="form-field">
-                  <span className="field-label">Milestone name</span>
-                  <input
-                    className="field-input"
-                    type="text"
-                    value={milestoneName}
-                    onChange={(event) => setMilestoneName(event.target.value)}
-                  />
-                </label>
-
-                <label className="form-field">
-                  <span className="field-label">Details</span>
-                  <textarea
-                    className="field-input field-input--multiline"
-                    value={milestoneDetail}
-                    onChange={(event) => setMilestoneDetail(event.target.value)}
-                    rows={3}
-                  />
-                </label>
-
-                <div className="form-actions">
-                  <button type="submit" className="primary-action-button">
-                    Log milestone
-                  </button>
-                </div>
-              </form>
-
-              <ul className="data-list">
-                {milestones.map((milestone) => (
-                  <li key={milestone.timestamp} className="data-list__item">
-                    <div>
-                      <p className="data-list__title">{milestone.name}</p>
-                      {milestone.details?.note ? (
-                        <p className="data-list__note">{milestone.details.note}</p>
-                      ) : null}
-                    </div>
-                    <div className="data-list__meta">
-                      <span>{new Date(milestone.timestamp).toLocaleString()}</span>
-                      {milestone.star ? <span className="meta-badge">Star</span> : null}
-                    </div>
-                  </li>
-                ))}
-                {milestones.length === 0 ? (
-                  <li className="data-list__item data-list__item--empty">No milestones logged yet.</li>
-                ) : null}
-              </ul>
-            </section>
-          </div>
-
-          <div className="panel-column">
-            <section className="control-card legacy-panel">
-              <h2 className="control-card__title">Legacy Log</h2>
-              <form className="form-grid" onSubmit={handleLegacySubmit}>
-                <label className="form-field">
-                  <span className="field-label">Reflection</span>
-                  <textarea
-                    className="field-input field-input--multiline"
-                    value={legacyReflection}
-                    onChange={(event) => setLegacyReflection(event.target.value)}
-                    rows={3}
-                  />
-                </label>
-                <div className="form-actions">
-                  <button type="submit" className="primary-action-button">
-                    Log reflection
-                  </button>
-                </div>
-              </form>
-
-              <ul className="data-list">
-                {legacyEntries.map((entry) => (
-                  <li key={entry.timestamp} className="data-list__item">
-                    <div>
-                      <p className="data-list__title">{entry.event}</p>
-                      {entry.details?.reflection ? (
-                        <p className="data-list__note">{entry.details.reflection}</p>
-                      ) : null}
-                    </div>
-                    <div className="data-list__meta">
-                      <span>{new Date(entry.timestamp).toLocaleString()}</span>
-                    </div>
-                  </li>
-                ))}
-                {legacyEntries.length === 0 ? (
-                  <li className="data-list__item data-list__item--empty">No reflections recorded yet.</li>
-                ) : null}
-              </ul>
-            </section>
-
-            <section className="control-card finance-panel">
-              <h2 className="control-card__title">Stealth Deposits</h2>
-              <form className="form-grid" onSubmit={handleDepositSubmit}>
-                <label className="form-field">
-                  <span className="field-label">Amount</span>
-                  <input
-                    className="field-input"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={depositAmount}
-                    onChange={(event) => setDepositAmount(event.target.value)}
-                  />
-                </label>
-
-                <label className="form-field">
-                  <span className="field-label">Account identifier</span>
-                  <input
-                    className="field-input"
-                    type="text"
-                    value={depositAccount}
-                    onChange={(event) => setDepositAccount(event.target.value)}
-                  />
-                </label>
-
-                <div className="form-actions">
-                  <button type="submit" className="primary-action-button">
-                    Queue deposit
-                  </button>
-                </div>
-              </form>
-
-              <ul className="data-list">
-                {depositQueue.map((deposit) => (
-                  <li key={deposit.timestamp} className="data-list__item">
-                    <div>
-                      <p className="data-list__title">
-                        {deposit.amount.toLocaleString(undefined, {
-                          style: "currency",
-                          currency: "USD"
-                        })}
-                      </p>
-                      <p className="data-list__note">{deposit.account}</p>
-                    </div>
-                    <div className="data-list__meta">
-                      <span>{new Date(deposit.timestamp).toLocaleString()}</span>
-                      <span className="meta-badge">{deposit.status}</span>
-                    </div>
-                  </li>
-                ))}
-                {depositQueue.length === 0 ? (
-                  <li className="data-list__item data-list__item--empty">No deposits queued yet.</li>
-                ) : null}
-              </ul>
-            </section>
-
-            <section className="control-card wallet-panel">
-              <div className="control-card__header">
-                <h2 className="control-card__title">Wallet Sync</h2>
-                <span className={`status-indicator status-indicator--${walletStatus}`}>
-                  {walletStatus}
-                </span>
-              </div>
-              <p className="control-card__description">
-                Connect MetaMask to synchronize cockpit telemetry with blockchain controls.
-              </p>
-              <button type="button" className="primary-action-button" onClick={connectWallet}>
-                Connect MetaMask
-              </button>
-            </section>
+    <nav style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '1rem 2rem',
+      background: 'rgba(0, 0, 0, 0.9)',
+      borderBottom: '1px solid rgba(0, 255, 136, 0.3)',
+      color: '#fff'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <M6Emblem size={48} />
+          <div>
+            <h1 style={{ margin: 0, fontSize: '1.5rem' }}>MTI6-GTADWIY</h1>
+            <p style={{ margin: 0, fontSize: '0.875rem', opacity: 0.6 }}>Sovereign Cockpit</p>
           </div>
         </div>
-      </main>
+
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <Link
+            to="/"
+            style={{
+              padding: '0.5rem 1rem',
+              background: isActive('/') ? '#00ff88' : 'transparent',
+              color: isActive('/') ? '#000' : '#fff',
+              textDecoration: 'none',
+              borderRadius: '8px',
+              fontWeight: 'bold',
+              transition: 'all 0.2s'
+            }}
+          >
+            🌍 Globe
+          </Link>
+          <Link
+            to="/trading"
+            style={{
+              padding: '0.5rem 1rem',
+              background: isActive('/trading') ? '#00ff88' : 'transparent',
+              color: isActive('/trading') ? '#000' : '#fff',
+              textDecoration: 'none',
+              borderRadius: '8px',
+              fontWeight: 'bold',
+              transition: 'all 0.2s'
+            }}
+          >
+            📊 Trading
+          </Link>
+          <Link
+            to="/cockpit"
+            style={{
+              padding: '0.5rem 1rem',
+              background: isActive('/cockpit') ? '#00ff88' : 'transparent',
+              color: isActive('/cockpit') ? '#000' : '#fff',
+              textDecoration: 'none',
+              borderRadius: '8px',
+              fontWeight: 'bold',
+              transition: 'all 0.2s'
+            }}
+          >
+            ⚙️ Cockpit
+          </Link>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ width: '300px' }}>
+          <SearchBar placeholder="Search cockpit..." />
+        </div>
+        <UserHead username="Sovereign" status="online" />
+      </div>
+    </nav>
+  );
+}
+
+/**
+ * Cockpit Dashboard (Original App content)
+ */
+function CockpitDashboard() {
+  return (
+    <div style={{
+      padding: '2rem',
+      background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%)',
+      minHeight: 'calc(100vh - 80px)',
+      color: '#fff'
+    }}>
+      <div style={{
+        maxWidth: '1400px',
+        margin: '0 auto'
+      }}>
+        <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>
+          Dashboard Overview
+        </h2>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '1.5rem',
+          marginBottom: '2rem'
+        }}>
+          {/* Quick stats */}
+          <div style={{
+            padding: '1.5rem',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '12px',
+            border: '1px solid rgba(0, 255, 136, 0.2)'
+          }}>
+            <div style={{ fontSize: '0.875rem', opacity: 0.7, marginBottom: '0.5rem' }}>
+              Total Balance
+            </div>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#00ff88' }}>
+              $10,247.83
+            </div>
+          </div>
+
+          <div style={{
+            padding: '1.5rem',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '12px',
+            border: '1px solid rgba(0, 170, 255, 0.2)'
+          }}>
+            <div style={{ fontSize: '0.875rem', opacity: 0.7, marginBottom: '0.5rem' }}>
+              Active Bots
+            </div>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#00aaff' }}>
+              3
+            </div>
+          </div>
+
+          <div style={{
+            padding: '1.5rem',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 215, 0, 0.2)'
+          }}>
+            <div style={{ fontSize: '0.875rem', opacity: 0.7, marginBottom: '0.5rem' }}>
+              24h Profit
+            </div>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ffd700' }}>
+              +$247.83
+            </div>
+          </div>
+        </div>
+
+        <div style={{
+          padding: '2rem',
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '12px',
+          textAlign: 'center'
+        }}>
+          <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
+            🚀 Cockpit Features
+          </h3>
+          <p style={{ opacity: 0.7, maxWidth: '600px', margin: '0 auto' }}>
+            Navigate to different screens using the menu above to access Globe visualization,
+            Trading interface, and full Cockpit controls with override management.
+          </p>
+        </div>
+      </div>
     </div>
   );
-};
+}
 
-export default App;
+/**
+ * Main App Component with Router
+ */
+export default function App() {
+  return (
+    <Router>
+      <div style={{ minHeight: '100vh', background: '#000' }}>
+        <Navigation />
+        <EarningsOverlay />
+        
+        <Routes>
+          <Route path="/" element={<GlobeScreen />} />
+          <Route path="/trading" element={<TradingScreen />} />
+          <Route path="/cockpit" element={<CockpitDashboard />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
