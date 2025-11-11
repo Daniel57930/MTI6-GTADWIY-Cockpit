@@ -1,15 +1,5 @@
-# IDEAS.md — Auto-saved ideas
+# IDEAS.md (MIGRATED)
 
-Mode: AUTO-SAVE-ALL (every message will be appended and committed automatically)
-Create Issues: no (default — reply if you want issues created for each idea)
+All previously auto-saved messages have been migrated to the private folder `private_ideas/` which is now git-ignored. This file has been replaced to avoid leaving private content in the public repository.
 
----
-
-2025-11-11 00:57:28 UTC — @Daniel57930
-- Enabled auto-save-all: save every idea and message automatically to this file.
-
----
-
-Notes:
-- To change behavior, tell me: "disable auto-save", "enable issues", or give a different preference.
-- I will append each subsequent message as a new entry with timestamp and author and commit it to the repository.
+If you want specific items made public or turned into issues, say so and I will create public issue(s) or move the selected entries into the public repo.
