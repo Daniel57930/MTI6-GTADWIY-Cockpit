@@ -1,25 +1,63 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { FlyToCamera } from './cameraControls';
 import { useWalletContext } from '../Wallet/WalletContext';
 
-export default function GlobeScreen({ points = [], walletMap: walletMapProp = {} }) {
+export default function GlobeScreen({ points: initialPoints = [], onSelectScreen }) {
   const { camera } = useThree();
   const sceneRef = useRef();
+  const [points, setPoints] = useState(initialPoints);
   const [pinPulseMap, setPinPulseMap] = useState({});
-  const [btcPrice, setBtcPrice] = useState(null);
-  const { walletMap: contextWalletMap } = useWalletContext();
-  const walletMap = Object.keys(contextWalletMap || {}).length ? contextWalletMap : (walletMapProp || {});
+  const { walletMap } = useWalletContext();
 
-  // Fog that fades with camera zoom
+  // Fetch points from API on mount
   useEffect(() => {
-    const scene = sceneRef.current;
-    if (!scene) return;
-    scene.fog = new THREE.FogExp2(0x111122, 0.002);
+    let mounted = true;
+    async function load() {
+      try {
+        const res = await fetch('/api/globe-points');
+        const json = await res.json();
+        if (!mounted) return;
+        setPoints(json.points || []);
+      } catch (e) {
+        console.warn('Failed to load globe points', e);
+      }
+    }
+    load();
+    return () => { mounted = false; };
   }, []);
 
-  // Update fog density each frame based on camera distance
+  // WebSocket to receive live updates (value changes)
+  useEffect(() => {
+    let ws;
+    try {
+      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      const host = window.location.host;
+      ws = new WebSocket(`${protocol}://${host}/ws/globe`);
+    } catch (e) {
+      console.warn('WebSocket init failed', e);
+      return;
+    }
+
+    ws.onmessage = (ev) => {
+      try {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === 'point-update' && msg.point) {
+          setPoints(prev => prev.map(p => p.id === msg.point.id ? { ...p, ...msg.point } : p));
+          // pulse the updated pin
+          setPinPulseMap(m => ({ ...m, [msg.point.id]: true }));
+          setTimeout(() => setPinPulseMap(m => { const nm = { ...m }; delete nm[msg.point.id]; return nm; }), 1000);
+        }
+      } catch (e) { console.warn('ws message parse', e); }
+    };
+
+    ws.onopen = () => { console.debug('ws globe connected'); };
+    ws.onclose = () => { console.debug('ws globe closed'); };
+
+    return () => { try { ws.close(); } catch (e) {} };
+  }, []);
+
   useFrame(() => {
     const scene = sceneRef.current;
     if (!scene || !camera) return;
@@ -28,39 +66,20 @@ export default function GlobeScreen({ points = [], walletMap: walletMapProp = {}
     if (scene.fog) scene.fog.density = density;
   });
 
-  // Poll CoinGecko for BTC price for New York pin example
-  useEffect(() => {
-    let mounted = true;
-    async function fetchBTC() {
-      try {
-        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
-        const j = await res.json();
-        if (!mounted) return;
-        setBtcPrice(j?.bitcoin?.usd ?? null);
-      } catch (e) {
-        console.warn('CoinGecko fetch failed', e);
-      }
-    }
-    fetchBTC();
-    const id = setInterval(fetchBTC, 30000);
-    return () => { mounted = false; clearInterval(id); };
-  }, []);
-
-  // Handler for price update pulse
-  function triggerPulse(pinId) {
-    setPinPulseMap(m => ({ ...m, [pinId]: true }));
-    setTimeout(() => setPinPulseMap(m => { const nm = { ...m }; delete nm[pinId]; return nm; }), 900);
+  function handlePinClick(point) {
+    // fly camera
+    FlyToCamera(camera, new THREE.Vector3(point.x, point.y, point.z));
+    // select trading screen with context
+    const payload = { city: point.city || point.name, symbol: point.symbol || 'BTC', valueUsd: point.valueUsd || 0, cityId: point.cityId };
+    onSelectScreen && onSelectScreen('trading', payload);
   }
 
-  // Helper: get balance for a point from walletMap or fallback
   function getBalanceForPoint(point) {
     if (!point.cityId) return null;
-    const entry = walletMap[point.cityId];
-    if (!entry) return null;
-    return entry.balance || entry.liquidity || null;
+    const entry = (walletMap || {})[point.cityId];
+    return entry ? entry.balance || entry.liquidity || null : null;
   }
 
-  // Convert balance string like "1.2345 ETH" or numeric to a number (ETH)
   function parseNumericBalance(b) {
     if (b == null) return 0;
     if (typeof b === 'number') return b;
@@ -73,8 +92,7 @@ export default function GlobeScreen({ points = [], walletMap: walletMapProp = {}
       {points.map(point => {
         const rawBal = getBalanceForPoint(point);
         const numericBal = parseNumericBalance(rawBal);
-        // scale and glow based on liquidity
-        const scale = 0.05 + Math.min(1, numericBal / 5) * 0.25; // up to 0.3 size
+        const scale = 0.05 + Math.min(1, numericBal / 5) * 0.25;
         const glowIntensity = Math.min(1, numericBal / 5);
 
         return (
@@ -82,12 +100,7 @@ export default function GlobeScreen({ points = [], walletMap: walletMapProp = {}
             key={point.id}
             position={[point.x, point.y, point.z]}
             scale={[scale, scale, scale]}
-            onClick={() => {
-              FlyToCamera(camera, new THREE.Vector3(point.x, point.y, point.z));
-              if (point.name && point.name.toLowerCase().includes('new york')) {
-                triggerPulse(point.id);
-              }
-            }}
+            onClick={() => handlePinClick(point)}
           >
             <sphereGeometry args={[1, 12, 12]} />
             <meshStandardMaterial
@@ -96,7 +109,7 @@ export default function GlobeScreen({ points = [], walletMap: walletMapProp = {}
               emissiveIntensity={0.6 * glowIntensity}
             />
 
-            {/* Wallet balance label */}
+            {/* balance label */}
             {rawBal != null && (
               <group position={[0, 0.12, 0]}>
                 <planeGeometry args={[0.8, 0.22]} />
