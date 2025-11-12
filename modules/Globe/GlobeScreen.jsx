@@ -2,14 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { FlyToCamera } from './cameraControls';
-import useWallet from '../../hooks/useWallet';
+import { useWalletContext } from '../Wallet/WalletContext';
 
-export default function GlobeScreen({ points = [], walletMap = {} }) {
+export default function GlobeScreen({ points = [], walletMap: walletMapProp = {} }) {
   const { camera } = useThree();
   const sceneRef = useRef();
   const [pinPulseMap, setPinPulseMap] = useState({});
   const [btcPrice, setBtcPrice] = useState(null);
-  const { account, balance } = useWallet();
+  const { walletMap: contextWalletMap } = useWalletContext();
+  const walletMap = Object.keys(contextWalletMap || {}).length ? contextWalletMap : (walletMapProp || {});
 
   // Fog that fades with camera zoom
   useEffect(() => {
@@ -97,11 +98,10 @@ export default function GlobeScreen({ points = [], walletMap = {} }) {
 
             {/* Wallet balance label */}
             {rawBal != null && (
-              <mesh position={[0, 0.12, 0]}>
+              <group position={[0, 0.12, 0]}>
                 <planeGeometry args={[0.8, 0.22]} />
                 <meshBasicMaterial transparent opacity={0.9} color="#001" />
-                {/* ideally use Text sprite — simplified here */}
-              </mesh>
+              </group>
             )}
           </mesh>
         );

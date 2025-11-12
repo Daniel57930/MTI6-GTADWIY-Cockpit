@@ -1,24 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import useWallet from '../../hooks/useWallet';
+import { useWalletContext } from './WalletContext';
 
-// Simple selector UI that delegates to the existing useWallet hook for MetaMask.
-// WalletConnect and Supabase entries are present as placeholders for future wiring.
+// WalletConnector wired to WalletContext
 export default function WalletConnector({ onProviderChange }) {
-  const [selected, setSelected] = useState('metamask');
-  const { account, balance, connect } = useWallet();
+  const { provider, setProvider, account, balance, connect } = useWalletContext();
+  const [selected, setSelected] = useState(provider || 'metamask');
 
   useEffect(() => {
-    onProviderChange && onProviderChange(selected, { account, balance });
-  }, [selected, account, balance, onProviderChange]);
+    setSelected(provider);
+    onProviderChange && onProviderChange(provider, { account, balance });
+  }, [provider, account, balance, onProviderChange]);
 
   function handleSelect(e) {
     const v = e.target.value;
     setSelected(v);
-    // If switching to MetaMask, attempt to connect automatically
+    setProvider(v);
     if (v === 'metamask') {
       connect().catch(() => {});
     }
-    // WalletConnect / Supabase placeholders: emit provider change for caller to handle
     onProviderChange && onProviderChange(v, { account, balance });
   }
 
