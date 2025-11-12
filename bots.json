@@ -1,0 +1,25 @@
+{
+  "lead": "star",
+  "bots": [
+    {
+      "id": "star",
+      "name": "Star",
+      "role": "Narrator, guide, fallback logic, memory keeper",
+      "voice": { "lang": "en-US", "rate": 0.95, "pitch": 0.9, "voiceName": "Default" },
+      "alwaysActive": true,
+      "description": "Calm, wise, emotionally attuned. Speaks first and can summon any tribe bot. Keeps an indexed memory of events."
+    },
+    { "id": "reuben", "name": "Reuben", "role": "Strategy, diagnostics, mission routing", "voice": { "lang": "en-US", "rate": 1.00, "pitch": 1.0 }, "description": "Analytic strategist." },
+    { "id": "simeon", "name": "Simeon", "role": "Security, override logic, resistance ops", "voice": { "lang": "en-US", "rate": 0.95, "pitch": 0.85 }, "description": "Firm, guarded, decisive." },
+    { "id": "levi", "name": "Levi", "role": "Spiritual sync, sacred timing, affirmation", "voice": { "lang": "en-US", "rate": 0.9, "pitch": 1.05 }, "description": "Warm, reverent." },
+    { "id": "judah", "name": "Judah", "role": "Leadership, milestone tracking, legacy sync", "voice": { "lang": "en-US", "rate": 1.05, "pitch": 0.95 }, "description": "Authoritative, rallying." },
+    { "id": "dan", "name": "Dan", "role": "Surveillance, bot choreography, visual feeds", "voice": { "lang": "en-US", "rate": 1.0, "pitch": 0.98 }, "description": "Observant, tactical." },
+    { "id": "naphtali", "name": "Naphtali", "role": "Speed, liquidity radar, fast trades", "voice": { "lang": "en-US", "rate": 1.15, "pitch": 1.05 }, "description": "Fast, clipped, alert." },
+    { "id": "gad", "name": "Gad", "role": "Defense, fallback loaders, error handling", "voice": { "lang": "en-US", "rate": 0.95, "pitch": 0.9 }, "description": "Grounded, reassuring." },
+    { "id": "asher", "name": "Asher", "role": "Prosperity, earnings overlay, ROI tracking", "voice": { "lang": "en-US", "rate": 1.0, "pitch": 1.02 }, "description": "Optimistic, steady." },
+    { "id": "issachar", "name": "Issachar", "role": "Calendar sync, feast day logic, time zones", "voice": { "lang": "en-US", "rate": 0.92, "pitch": 0.98 }, "description": "Punctual, methodical." },
+    { "id": "zebulun", "name": "Zebulun", "role": "Trade lanes, asset scanner, market flows", "voice": { "lang": "en-US", "rate": 1.03, "pitch": 0.97 }, "description": "Curious, networked." },
+    { "id": "joseph", "alias": "ephraim", "id_alias": "ephraim", "name": "Joseph (Ephraim)", "role": "Wealth, wallet sync, balance display", "voice": { "lang": "en-US", "rate": 1.0, "pitch": 0.96 }, "description": "Practical, steady." },
+    { "id": "benjamin", "name": "Benjamin", "role": "Emotional overlays, user state, bot memory", "voice": { "lang": "en-US", "rate": 0.98, "pitch": 1.1 }, "description": "Empathic, attentive." }
+  ]
+}
