@@ -2,12 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { FlyToCamera } from './cameraControls';
+import useWallet from '../../hooks/useWallet';
 
-export default function GlobeScreen({ points = [] }) {
+export default function GlobeScreen({ points = [], walletMap = {} }) {
   const { camera } = useThree();
   const sceneRef = useRef();
   const [pinPulseMap, setPinPulseMap] = useState({});
   const [btcPrice, setBtcPrice] = useState(null);
+  const { account, balance } = useWallet();
 
   // Fog that fades with camera zoom
   useEffect(() => {
@@ -20,7 +22,6 @@ export default function GlobeScreen({ points = [] }) {
   useFrame(() => {
     const scene = sceneRef.current;
     if (!scene || !camera) return;
-    // Map camera.position.z to fog density (tweak as needed)
     const z = camera.position.z || 1;
     const density = THREE.MathUtils.clamp((z - 2) * 0.0008, 0.0001, 0.01);
     if (scene.fog) scene.fog.density = density;
@@ -50,40 +51,61 @@ export default function GlobeScreen({ points = [] }) {
     setTimeout(() => setPinPulseMap(m => { const nm = { ...m }; delete nm[pinId]; return nm; }), 900);
   }
 
-  // Example WebSocket or event hook placeholder to trigger pulses on price updates
-  useEffect(() => {
-    // Placeholder: wire your WS or event emitter here and call triggerPulse(pinId)
-    // Example:
-    // ws.on('price-update', ({ pinId }) => triggerPulse(pinId));
-  }, []);
+  // Helper: get balance for a point from walletMap or fallback
+  function getBalanceForPoint(point) {
+    if (!point.cityId) return null;
+    const entry = walletMap[point.cityId];
+    if (!entry) return null;
+    return entry.balance || entry.liquidity || null;
+  }
+
+  // Convert balance string like "1.2345 ETH" or numeric to a number (ETH)
+  function parseNumericBalance(b) {
+    if (b == null) return 0;
+    if (typeof b === 'number') return b;
+    const m = String(b).match(/([0-9]+\.?[0-9]*)/);
+    return m ? parseFloat(m[1]) : 0;
+  }
 
   return (
     <group ref={sceneRef}>
-      {/* Example globe and pins rendering. Replace with your actual globe code. */}
-      {points.map(point => (
-        <mesh
-          key={point.id}
-          position={[point.x, point.y, point.z]}
-          onClick={() => {
-            // camera fly-to
-            FlyToCamera(camera, new THREE.Vector3(point.x, point.y, point.z));
-            // if this is New York and we have price, show pulse
-            if (point.name && point.name.toLowerCase().includes('new york')) {
-              triggerPulse(point.id);
-            }
-          }}
-        >
-          <sphereGeometry args={[0.05, 12, 12]} />
-          <meshStandardMaterial color={pinPulseMap[point.id] ? 'hotpink' : 'orange'} />
-          {/* Price label example for New York */}
-          {point.name && point.name.toLowerCase().includes('new york') && btcPrice != null && (
-            <mesh position={[0, 0.12, 0]}>
-              <planeGeometry args={[0.6, 0.18]} />
-              <meshBasicMaterial transparent opacity={0.85} color="#000" />
-            </mesh>
-          )}
-        </mesh>
-      ))}
+      {points.map(point => {
+        const rawBal = getBalanceForPoint(point);
+        const numericBal = parseNumericBalance(rawBal);
+        // scale and glow based on liquidity
+        const scale = 0.05 + Math.min(1, numericBal / 5) * 0.25; // up to 0.3 size
+        const glowIntensity = Math.min(1, numericBal / 5);
+
+        return (
+          <mesh
+            key={point.id}
+            position={[point.x, point.y, point.z]}
+            scale={[scale, scale, scale]}
+            onClick={() => {
+              FlyToCamera(camera, new THREE.Vector3(point.x, point.y, point.z));
+              if (point.name && point.name.toLowerCase().includes('new york')) {
+                triggerPulse(point.id);
+              }
+            }}
+          >
+            <sphereGeometry args={[1, 12, 12]} />
+            <meshStandardMaterial
+              color={pinPulseMap[point.id] ? 'hotpink' : 'orange'}
+              emissive={new THREE.Color(0xffaa66).multiplyScalar(glowIntensity)}
+              emissiveIntensity={0.6 * glowIntensity}
+            />
+
+            {/* Wallet balance label */}
+            {rawBal != null && (
+              <mesh position={[0, 0.12, 0]}>
+                <planeGeometry args={[0.8, 0.22]} />
+                <meshBasicMaterial transparent opacity={0.9} color="#001" />
+                {/* ideally use Text sprite — simplified here */}
+              </mesh>
+            )}
+          </mesh>
+        );
+      })}
     </group>
   );
 }
