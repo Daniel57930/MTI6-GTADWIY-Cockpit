@@ -1,25 +1,40 @@
-import React, { useState } from "react";
-import ScreenSelector from "./modules/Shared/ScreenSelector";
-import GlobeScreen from "./modules/Globe/GlobeScreen";
-import TradingPlatform from "./modules/Trading/TradingPlatform";
-import StakingScreen from "./modules/Staking/StakingScreen";
-import FarmingScreen from "./modules/Farming/FarmingScreen";
-import MiningScreen from "./modules/Mining/MiningScreen";
-import StoreScreen from "./modules/Store/StoreScreen";
-import GTADWIYGlobeScreen from "./modules/GTADWIY/GTADWIYGlobeScreen";
+import React, { useState } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { WalletProvider } from './modules/Wallet/WalletContext';
+import GlobeScreen from './modules/Globe/GlobeScreen';
+import TradingPlatform from './modules/Trading/TradingPlatform';
 
 export default function App() {
-  const [screen, setScreen] = useState("globe");
+  const [screen, setScreen] = useState('globe'); // 'globe' | 'trading'
+  const [screenParams, setScreenParams] = useState({});
+
+  function handleSelectScreen(screenName, params = {}) {
+    setScreen(screenName);
+    setScreenParams(params);
+  }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#10102a" }}>
-      {screen === "globe" && <GlobeScreen onSelectScreen={setScreen} />}
-      {screen === "trading" && <><ScreenSelector value={screen} onSelect={setScreen} /><TradingPlatform /></>}
-      {screen === "staking" && <><ScreenSelector value={screen} onSelect={setScreen} /><StakingScreen /></>}
-      {screen === "farming" && <><ScreenSelector value={screen} onSelect={setScreen} /><FarmingScreen /></>}
-      {screen === "mining" && <><ScreenSelector value={screen} onSelect={setScreen} /><MiningScreen /></>}
-      {screen === "store" && <><ScreenSelector value={screen} onSelect={setScreen} /><StoreScreen /></>}
-      {screen === "gtadwiy" && <><ScreenSelector value={screen} onSelect={setScreen} /><GTADWIYGlobeScreen /></>}
-    </div>
+    <WalletProvider>
+      <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <header style={{ padding: 8, background: '#0b0b12', color: '#fff' }}>
+          <h3>MTI6 Cockpit</h3>
+        </header>
+
+        <main style={{ flex: 1, position: 'relative' }}>
+          {screen === 'globe' && (
+            <Canvas camera={{ position: [0, 0, 6] }}>
+              <GlobeScreen onSelectScreen={handleSelectScreen} />
+            </Canvas>
+          )}
+
+          {screen === 'trading' && (
+            <div style={{ width: '100%', height: '100%' }}>
+              <button onClick={() => setScreen('globe')} style={{ position: 'absolute', zIndex: 10, left: 12, top: 12 }}>Back</button>
+              <TradingPlatform {...screenParams} />
+            </div>
+          )}
+        </main>
+      </div>
+    </WalletProvider>
   );
 }
