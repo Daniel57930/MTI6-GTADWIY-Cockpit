@@ -26,14 +26,10 @@ jobs:
         run: npm ci
       
       - name: Run lint
-        if: hashFiles('package.json') != '' && contains(toJSON(fromJSON(hashFiles('package.json'))), 'lint')
         run: npm run lint --if-present
-        continue-on-error: false
       
       - name: Run tests
-        if: hashFiles('package.json') != '' && contains(toJSON(fromJSON(hashFiles('package.json'))), 'test')
         run: npm test --if-present
-        continue-on-error: false
       
       - name: Build frontend
         run: npm run build
@@ -68,14 +64,11 @@ jobs:
       - name: Run server lint
         working-directory: ./server
         run: npm run lint --if-present
-        continue-on-error: false
       
       - name: Run server tests
         working-directory: ./server
         run: npm test --if-present
-        continue-on-error: false
       
       - name: Build server (if build script exists)
         working-directory: ./server
         run: npm run build --if-present
-        continue-on-error: false
