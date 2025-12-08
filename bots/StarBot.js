@@ -1,181 +1,177 @@
 /**
- * Star Bot - Advanced AI-powered trading bot
- * Uses multiple AI APIs for decision making
+ * StarBot - Main Communicator
+ * 
+ * The central orchestrator for the 12-tribes bot system.
+ * Import-safe, synchronous, deterministic, and side-effect free.
  */
 
-import * as openai from '../api/openai.js';
-import * as huggingface from '../api/huggingface.js';
-import * as coingecko from '../api/coingecko.js';
-import * as lunarcrush from '../api/lunarcrush.js';
-import businessRules from '../logic/businessRules.js';
-
-export const config = {
-  name: 'StarBot',
-  strategy: 'scalping',
-  targetAssets: ['BTC', 'ETH', 'SOL'],
-  tradeInterval: 60000, // 1 minute
-  riskLevel: 'moderate',
-  aiEnabled: true
+const metadata = {
+  name: 'Star',
+  title: 'Star - Main Communicator',
+  defaultAppearance: {
+    id: 'star-default',
+    theme: 'celestial',
+    color: '#FFD700',
+    icon: '⭐'
+  },
+  description: 'Central communicator and orchestrator for the 12-tribes bot system. Routes messages, manages bot registry, and coordinates tribe bot activities.'
 };
 
+// Internal state (closure-based, no global side effects)
+let botRegistry = new Map();
+let messageListeners = [];
+
 /**
- * Analyze using AI
+ * Register bot modules synchronously
+ * @param {Map<string, object>} botMap - Map of bot name to bot module
  */
-async function analyzeWithAI(asset, marketData) {
-  console.log(`[StarBot] Analyzing ${asset} with AI...`);
+function registerBots(botMap) {
+  if (!(botMap instanceof Map)) {
+    throw new TypeError('botMap must be a Map instance');
+  }
+  
+  botMap.forEach((botModule, name) => {
+    if (!botModule || typeof botModule !== 'object') {
+      throw new TypeError(`Bot module for ${name} must be an object`);
+    }
+    if (!botModule.metadata || !botModule.metadata.name) {
+      throw new Error(`Bot module for ${name} must have metadata.name`);
+    }
+    botRegistry.set(name, botModule);
+  });
+}
 
-  const prompt = `
-    Analyze cryptocurrency ${asset} based on:
-    - Current price: ${marketData.price}
-    - 24h change: ${marketData.change}%
-    - Social sentiment: ${marketData.sentiment}
-    
-    Should I buy, sell, or hold? Provide reasoning.
-  `;
+/**
+ * Send a message to a registered bot synchronously
+ * @param {string} name - Bot name
+ * @param {string} message - Message to send
+ * @returns {object} Deterministic response
+ */
+function sendTo(name, message) {
+  if (typeof name !== 'string' || typeof message !== 'string') {
+    return {
+      success: false,
+      error: 'Invalid name or message type',
+      timestamp: Date.now()
+    };
+  }
 
-  const aiDecision = await openai.generateCompletion(prompt, {
-    temperature: 0.3,
-    maxTokens: 200
+  const bot = botRegistry.get(name);
+  if (!bot) {
+    return {
+      success: false,
+      error: `Bot "${name}" not found in registry`,
+      timestamp: Date.now()
+    };
+  }
+
+  // Notify listeners
+  messageListeners.forEach(listener => {
+    try {
+      listener({ from: 'Star', to: name, message });
+    } catch (err) {
+      // Suppress listener errors to maintain determinism
+    }
   });
 
-  // Also get sentiment analysis
-  const sentiment = await huggingface.analyzeSentiment(
-    `${asset} cryptocurrency market news and social media posts`
-  );
-
-  return {
-    decision: aiDecision.text,
-    sentiment: sentiment.label,
-    confidence: sentiment.score
-  };
-}
-
-/**
- * Make trading decision
- */
-export async function makeDecision(asset) {
-  console.log(`[StarBot] Making decision for ${asset}...`);
-
-  try {
-    // Gather market data
-    const price = await coingecko.getPrice(asset.toLowerCase());
-    const social = await lunarcrush.getAssetMetrics(asset);
-
-    const marketData = {
-      price: price[asset.toLowerCase()]?.usd || 0,
-      change: price[asset.toLowerCase()]?.usd_24h_change || 0,
-      sentiment: social.data?.social_score || 50
-    };
-
-    // Get AI analysis
-    const analysis = await analyzeWithAI(asset, marketData);
-
-    // Determine action
-    let action = 'hold';
-    if (analysis.sentiment === 'POSITIVE' && analysis.confidence > 0.8) {
-      action = 'buy';
-    } else if (analysis.sentiment === 'NEGATIVE' && analysis.confidence > 0.8) {
-      action = 'sell';
-    }
-
-    return {
-      asset,
-      action,
-      confidence: analysis.confidence,
-      reasoning: analysis.decision,
-      marketData
-    };
-  } catch (error) {
-    console.error(`[StarBot] Decision error:`, error);
-    return {
-      asset,
-      action: 'hold',
-      confidence: 0,
-      error: error.message
-    };
-  }
-}
-
-/**
- * Execute trading strategy
- */
-export async function executeTrade(decision) {
-  if (decision.action === 'hold') {
-    console.log(`[StarBot] Holding ${decision.asset}`);
-    return { success: true, action: 'hold' };
-  }
-
-  const tradeParams = {
-    asset: decision.asset,
-    amount: 100,
-    type: 'market',
-    direction: decision.action === 'buy' ? 'up' : 'down'
-  };
-
-  // Validate before executing
-  const validation = businessRules.validateTrade(tradeParams);
-  if (!validation.valid) {
-    console.error(`[StarBot] Trade invalid:`, validation.errors);
-    return { success: false, errors: validation.errors };
-  }
-
-  console.log(`[StarBot] Executing ${decision.action} for ${decision.asset}`);
-  
-  // Simulate trade execution
+  // Return deterministic response
   return {
     success: true,
-    action: decision.action,
-    orderId: Date.now(),
-    params: tradeParams,
-    confidence: decision.confidence
+    to: name,
+    message,
+    botMetadata: bot.metadata,
+    timestamp: Date.now()
   };
 }
 
 /**
- * Run bot cycle
+ * Register a message listener (synchronous)
+ * @param {Function} fn - Listener function
+ * @returns {Function} Unsubscribe function
  */
-export async function runCycle() {
-  console.log(`[StarBot] Starting trading cycle...`);
-
-  for (const asset of config.targetAssets) {
-    const decision = await makeDecision(asset);
-    
-    if (decision.action !== 'hold') {
-      const result = await executeTrade(decision);
-      console.log(`[StarBot] Trade result for ${asset}:`, result);
-    }
-
-    // Wait between assets to avoid rate limits
-    await new Promise(resolve => setTimeout(resolve, 2000));
+function onMessage(fn) {
+  if (typeof fn !== 'function') {
+    throw new TypeError('Listener must be a function');
   }
-
-  console.log(`[StarBot] Cycle complete`);
+  
+  messageListeners.push(fn);
+  
+  // Return unsubscribe function
+  return () => {
+    const index = messageListeners.indexOf(fn);
+    if (index > -1) {
+      messageListeners.splice(index, 1);
+    }
+  };
 }
 
 /**
- * Start bot
+ * Morph appearance based on target context (pure function)
+ * @param {string} target - Target context (e.g., 'web', 'mobile', 'terminal')
+ * @returns {object} Appearance object
  */
-export function start() {
-  console.log(`[StarBot] Starting with strategy: ${config.strategy}`);
+function morph(target) {
+  const appearances = {
+    web: {
+      id: 'star-web',
+      theme: 'celestial',
+      color: '#FFD700',
+      icon: '⭐',
+      size: 'medium',
+      animation: 'pulse'
+    },
+    mobile: {
+      id: 'star-mobile',
+      theme: 'compact',
+      color: '#FFD700',
+      icon: '⭐',
+      size: 'small',
+      animation: 'fade'
+    },
+    terminal: {
+      id: 'star-terminal',
+      theme: 'ascii',
+      color: 'yellow',
+      icon: '*',
+      size: 'text',
+      animation: 'none'
+    },
+    default: {
+      id: 'star-default',
+      theme: 'celestial',
+      color: '#FFD700',
+      icon: '⭐'
+    }
+  };
+
+  return appearances[target] || appearances.default;
+}
+
+/**
+ * Start the bot (synchronous control handle)
+ * @returns {object} Control handle with stop()
+ */
+function start() {
+  // No side effects - just return control handle
+  let isRunning = true;
   
-  // Run initial cycle
-  runCycle();
-
-  // Schedule recurring cycles
-  const intervalId = setInterval(runCycle, config.tradeInterval);
-
   return {
     stop: () => {
-      console.log(`[StarBot] Stopping...`);
-      clearInterval(intervalId);
-    }
+      isRunning = false;
+      // Clear registry and listeners on stop
+      botRegistry.clear();
+      messageListeners = [];
+    },
+    isRunning: () => isRunning
   };
 }
 
+// Export as default object (import-safe)
 export default {
-  config,
-  makeDecision,
-  executeTrade,
-  runCycle,
+  metadata,
+  registerBots,
+  sendTo,
+  onMessage,
+  morph,
   start
 };

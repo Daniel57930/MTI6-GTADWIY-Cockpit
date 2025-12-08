@@ -228,6 +228,12 @@ The project uses:
 
 - Daniel Richardson (@Daniel57930)
 
+## 🤖 Bot System
+
+The cockpit features a comprehensive **13-bot system**: **StarBot** (the main communicator) plus **12 tribe bots** named after the Twelve Tribes of Israel. Each bot is import-safe, synchronous, and deterministic.
+
+For complete documentation on the bot system, architecture, usage examples, and testing guidance, see **[docs/BOTS.md](./docs/BOTS.md)**.
+
 ## 📄 License
 
 MIT (see LICENSE)
