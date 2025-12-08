@@ -1,1 +1,31 @@
 private_ideas/
+
+# Dependencies
+node_modules/
+server/node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Test coverage
+coverage/
+test-results/
