@@ -51,8 +51,11 @@ Daniel Richardson's sovereign cockpit — real-time trading, AI-powered bots, ov
 
 ### Bots
 - **MainBot**: Orchestrates all operations
-- **StarBot**: AI-powered scalping bot
+- **StarBot**: AI-powered scalping bot (primary virtual AI)
 - **SamsonBot**: Sentiment-focused swing trader
+- **Twelve Tribes**: Family of 12 intelligent, morph-capable bots (Reuben, Simeon, Levi, Judah, Dan, Naphtali, Gad, Asher, Issachar, Zebulun, Joseph, Benjamin)
+
+For detailed bot documentation, personalities, and usage examples, see [Bot System Documentation](./docs/BOTS.md).
 
 ## 📦 Installation
 
@@ -204,6 +207,7 @@ samsonBotInstance.stop();
 
 ## 📚 Documentation
 
+- [Bot System Documentation](./docs/BOTS.md) - Star and Twelve Tribes bot system
 - [API Documentation](./api/README.md) - Complete API reference
 - [Contributing Guidelines](./CONTRIBUTING.md) - How to contribute
 
