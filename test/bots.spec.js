@@ -17,7 +17,7 @@ async function safeImport(modulePath) {
 
 describe('StarBot - Main Communicator', () => {
   test('is import-safe and exports expected structure', async () => {
-    const StarBot = await safeImport('./bots/StarBot.js');
+    const StarBot = await safeImport('../bots/StarBot.js');
     
     expect(StarBot).toBeDefined();
     expect(StarBot).toBeTypeOf('object');
@@ -26,7 +26,7 @@ describe('StarBot - Main Communicator', () => {
   });
 
   test('start() returns handle with stop()', async () => {
-    const StarBot = await safeImport('./bots/StarBot.js');
+    const StarBot = await safeImport('../bots/StarBot.js');
     const handle = StarBot.start();
     
     expect(handle).toBeDefined();
@@ -36,7 +36,7 @@ describe('StarBot - Main Communicator', () => {
   });
 
   test('morph("web") returns object with id string', async () => {
-    const StarBot = await safeImport('./bots/StarBot.js');
+    const StarBot = await safeImport('../bots/StarBot.js');
     const appearance = StarBot.morph('web');
     
     expect(appearance).toBeDefined();
@@ -46,8 +46,8 @@ describe('StarBot - Main Communicator', () => {
   });
 
   test('registerBots can register a tribe bot', async () => {
-    const StarBot = await safeImport('./bots/StarBot.js');
-    const ReubenBot = await safeImport('./bots/ReubenBot.js');
+    const StarBot = await safeImport('../bots/StarBot.js');
+    const ReubenBot = await safeImport('../bots/ReubenBot.js');
     
     const botMap = new Map();
     botMap.set('Reuben', ReubenBot);
@@ -56,8 +56,8 @@ describe('StarBot - Main Communicator', () => {
   });
 
   test('sendTo routes message synchronously to registered bot', async () => {
-    const StarBot = await safeImport('./bots/StarBot.js');
-    const JudahBot = await safeImport('./bots/JudahBot.js');
+    const StarBot = await safeImport('../bots/StarBot.js');
+    const JudahBot = await safeImport('../bots/JudahBot.js');
     
     const botMap = new Map();
     botMap.set('Judah', JudahBot);
@@ -74,7 +74,7 @@ describe('StarBot - Main Communicator', () => {
   });
 
   test('sendTo handles non-existent bot gracefully', async () => {
-    const StarBot = await safeImport('./bots/StarBot.js');
+    const StarBot = await safeImport('../bots/StarBot.js');
     
     const response = StarBot.sendTo('NonExistent', 'Test');
     
@@ -84,7 +84,7 @@ describe('StarBot - Main Communicator', () => {
   });
 
   test('onMessage registers listener and returns unsubscribe', async () => {
-    const StarBot = await safeImport('./bots/StarBot.js');
+    const StarBot = await safeImport('../bots/StarBot.js');
     
     let messageReceived = null;
     const unsubscribe = StarBot.onMessage((event) => {
@@ -94,7 +94,7 @@ describe('StarBot - Main Communicator', () => {
     expect(unsubscribe).toBeTypeOf('function');
     
     // Register a bot and send message
-    const SimeonBot = await safeImport('./bots/SimeonBot.js');
+    const SimeonBot = await safeImport('../bots/SimeonBot.js');
     const botMap = new Map();
     botMap.set('Simeon', SimeonBot);
     StarBot.registerBots(botMap);
@@ -109,18 +109,18 @@ describe('StarBot - Main Communicator', () => {
 
 describe('Tribe Bots - The Twelve Tribes', () => {
   const tribeBots = [
-    { name: 'Reuben', path: './bots/ReubenBot.js' },
-    { name: 'Simeon', path: './bots/SimeonBot.js' },
-    { name: 'Levi', path: './bots/LeviBot.js' },
-    { name: 'Judah', path: './bots/JudahBot.js' },
-    { name: 'Dan', path: './bots/DanBot.js' },
-    { name: 'Naphtali', path: './bots/NaphtaliBot.js' },
-    { name: 'Gad', path: './bots/GadBot.js' },
-    { name: 'Asher', path: './bots/AsherBot.js' },
-    { name: 'Issachar', path: './bots/IssacharBot.js' },
-    { name: 'Zebulun', path: './bots/ZebulunBot.js' },
-    { name: 'Joseph', path: './bots/JosephBot.js' },
-    { name: 'Benjamin', path: './bots/BenjaminBot.js' }
+    { name: 'Reuben', path: '../bots/ReubenBot.js' },
+    { name: 'Simeon', path: '../bots/SimeonBot.js' },
+    { name: 'Levi', path: '../bots/LeviBot.js' },
+    { name: 'Judah', path: '../bots/JudahBot.js' },
+    { name: 'Dan', path: '../bots/DanBot.js' },
+    { name: 'Naphtali', path: '../bots/NaphtaliBot.js' },
+    { name: 'Gad', path: '../bots/GadBot.js' },
+    { name: 'Asher', path: '../bots/AsherBot.js' },
+    { name: 'Issachar', path: '../bots/IssacharBot.js' },
+    { name: 'Zebulun', path: '../bots/ZebulunBot.js' },
+    { name: 'Joseph', path: '../bots/JosephBot.js' },
+    { name: 'Benjamin', path: '../bots/BenjaminBot.js' }
   ];
 
   tribeBots.forEach(({ name, path }) => {
@@ -179,7 +179,7 @@ describe('Tribe Bots - The Twelve Tribes', () => {
   });
 
   test('all 12 tribe bots can be registered with StarBot', async () => {
-    const StarBot = await safeImport('./bots/StarBot.js');
+    const StarBot = await safeImport('../bots/StarBot.js');
     const botMap = new Map();
     
     for (const { name, path } of tribeBots) {
@@ -192,7 +192,7 @@ describe('Tribe Bots - The Twelve Tribes', () => {
   });
 
   test('StarBot can send messages to all 12 tribe bots', async () => {
-    const StarBot = await safeImport('./bots/StarBot.js');
+    const StarBot = await safeImport('../bots/StarBot.js');
     const botMap = new Map();
     
     for (const { name, path } of tribeBots) {
@@ -214,19 +214,19 @@ describe('Tribe Bots - The Twelve Tribes', () => {
 describe('Bot System Integration', () => {
   test('total bot count is exactly 13 (Star + 12 tribes)', async () => {
     const allBotPaths = [
-      './bots/StarBot.js',
-      './bots/ReubenBot.js',
-      './bots/SimeonBot.js',
-      './bots/LeviBot.js',
-      './bots/JudahBot.js',
-      './bots/DanBot.js',
-      './bots/NaphtaliBot.js',
-      './bots/GadBot.js',
-      './bots/AsherBot.js',
-      './bots/IssacharBot.js',
-      './bots/ZebulunBot.js',
-      './bots/JosephBot.js',
-      './bots/BenjaminBot.js'
+      '../bots/StarBot.js',
+      '../bots/ReubenBot.js',
+      '../bots/SimeonBot.js',
+      '../bots/LeviBot.js',
+      '../bots/JudahBot.js',
+      '../bots/DanBot.js',
+      '../bots/NaphtaliBot.js',
+      '../bots/GadBot.js',
+      '../bots/AsherBot.js',
+      '../bots/IssacharBot.js',
+      '../bots/ZebulunBot.js',
+      '../bots/JosephBot.js',
+      '../bots/BenjaminBot.js'
     ];
     
     expect(allBotPaths.length).toBe(13);
@@ -241,19 +241,19 @@ describe('Bot System Integration', () => {
 
   test('no duplicate bot names', async () => {
     const allBotPaths = [
-      './bots/StarBot.js',
-      './bots/ReubenBot.js',
-      './bots/SimeonBot.js',
-      './bots/LeviBot.js',
-      './bots/JudahBot.js',
-      './bots/DanBot.js',
-      './bots/NaphtaliBot.js',
-      './bots/GadBot.js',
-      './bots/AsherBot.js',
-      './bots/IssacharBot.js',
-      './bots/ZebulunBot.js',
-      './bots/JosephBot.js',
-      './bots/BenjaminBot.js'
+      '../bots/StarBot.js',
+      '../bots/ReubenBot.js',
+      '../bots/SimeonBot.js',
+      '../bots/LeviBot.js',
+      '../bots/JudahBot.js',
+      '../bots/DanBot.js',
+      '../bots/NaphtaliBot.js',
+      '../bots/GadBot.js',
+      '../bots/AsherBot.js',
+      '../bots/IssacharBot.js',
+      '../bots/ZebulunBot.js',
+      '../bots/JosephBot.js',
+      '../bots/BenjaminBot.js'
     ];
     
     const names = new Set();
