@@ -17,10 +17,6 @@ const metadata = {
   description: 'Central communicator and orchestrator for the 12-tribes bot system. Routes messages, manages bot registry, and coordinates tribe bot activities.'
 };
 
-// Internal state (closure-based, no global side effects)
-let botRegistry = new Map();
-let messageListeners = [];
-
 /**
  * Register bot modules synchronously
  * @param {Map<string, object>} botMap - Map of bot name to bot module
@@ -37,7 +33,12 @@ function registerBots(botMap) {
     if (!botModule.metadata || !botModule.metadata.name) {
       throw new Error(`Bot module for ${name} must have metadata.name`);
     }
-    botRegistry.set(name, botModule);
+    // Store in a module-scoped registry for simplicity
+    // In production, this would be managed per-instance
+    if (!globalThis.__starBotRegistry) {
+      globalThis.__starBotRegistry = new Map();
+    }
+    globalThis.__starBotRegistry.set(name, botModule);
   });
 }
 
@@ -56,7 +57,8 @@ function sendTo(name, message) {
     };
   }
 
-  const bot = botRegistry.get(name);
+  const registry = globalThis.__starBotRegistry || new Map();
+  const bot = registry.get(name);
   if (!bot) {
     return {
       success: false,
@@ -66,7 +68,8 @@ function sendTo(name, message) {
   }
 
   // Notify listeners
-  messageListeners.forEach(listener => {
+  const listeners = globalThis.__starBotListeners || [];
+  listeners.forEach(listener => {
     try {
       listener({ from: 'Star', to: name, message });
     } catch (err) {
@@ -94,13 +97,17 @@ function onMessage(fn) {
     throw new TypeError('Listener must be a function');
   }
   
-  messageListeners.push(fn);
+  if (!globalThis.__starBotListeners) {
+    globalThis.__starBotListeners = [];
+  }
+  globalThis.__starBotListeners.push(fn);
   
   // Return unsubscribe function
   return () => {
-    const index = messageListeners.indexOf(fn);
+    if (!globalThis.__starBotListeners) return;
+    const index = globalThis.__starBotListeners.indexOf(fn);
     if (index > -1) {
-      messageListeners.splice(index, 1);
+      globalThis.__starBotListeners.splice(index, 1);
     }
   };
 }
@@ -152,15 +159,26 @@ function morph(target) {
  * @returns {object} Control handle with stop()
  */
 function start() {
-  // No side effects - just return control handle
+  // Initialize fresh state for this instance
+  if (!globalThis.__starBotRegistry) {
+    globalThis.__starBotRegistry = new Map();
+  }
+  if (!globalThis.__starBotListeners) {
+    globalThis.__starBotListeners = [];
+  }
+  
   let isRunning = true;
   
   return {
     stop: () => {
       isRunning = false;
       // Clear registry and listeners on stop
-      botRegistry.clear();
-      messageListeners = [];
+      if (globalThis.__starBotRegistry) {
+        globalThis.__starBotRegistry.clear();
+      }
+      if (globalThis.__starBotListeners) {
+        globalThis.__starBotListeners.length = 0;
+      }
     },
     isRunning: () => isRunning
   };

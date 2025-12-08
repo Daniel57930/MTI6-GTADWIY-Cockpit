@@ -237,7 +237,7 @@ All bots come with comprehensive vitest smoke tests. Tests verify:
 **Run tests:**
 
 ```bash
-npm test tests/bots.spec.js
+npm test test/bots.spec.js
 ```
 
 **Test Structure:**
