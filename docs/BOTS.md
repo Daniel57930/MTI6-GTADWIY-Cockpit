@@ -212,14 +212,22 @@ The morphing system is:
 - **Synchronous:** Returns immediately with no async operations
 - **Safe:** Can be called repeatedly without issues
 
-## 144,000 Virtual Personas
+## Virtual Personas & Scalability
 
-The Twelve Tribes system supports morphing into 144,000 unique virtual personas:
+The Twelve Tribes system currently supports 48 unique personas (12 bots × 4 morph targets):
 - 12 base tribe bots
-- Each can morph into 12,000 variants (4 base presets × 3,000 algorithmic variations)
+- Each can morph into 4 base presets: `web`, `trader`, `warrior`, `scholar`
 - All morphs are deterministic and traceable
 
-This allows for massive scalability while maintaining control and safety.
+### Future Expansion to 144,000 Personas
+
+The architecture is designed to scale to 144,000 unique virtual personas:
+- Each of the 4 base presets can have algorithmic variations
+- Planned: 3,000 algorithmic variations per preset per bot
+- Formula: 12 tribes × 4 presets × 3,000 variations = 144,000 personas
+- Variations will remain deterministic and side-effect free
+
+This modular design allows for massive future scalability while maintaining current simplicity, control, and safety.
 
 ## Integration with MainBot
 
